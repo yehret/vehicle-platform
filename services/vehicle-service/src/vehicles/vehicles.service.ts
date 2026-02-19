@@ -1,52 +1,59 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Vehicle } from '@prisma/client';
+import { PrismaService } from '../common/prisma/prisma.service';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
-import { Vehicle } from './entities/vehicle.entity';
 
 @Injectable()
 export class VehiclesService {
-	constructor(
-		@InjectRepository(Vehicle)
-		private readonly vehiclesRepository: Repository<Vehicle>
-	) {}
+	constructor(private readonly prismaService: PrismaService) {}
 
-	async createEmptyForUser(userId: number): Promise<Vehicle> {
-		const newVehicle = this.vehiclesRepository.create({
-			user_id: userId,
-			make: 'Unknown',
-			model: 'Unknown'
+	async createEmptyForUser(userId: string): Promise<Vehicle> {
+		return await this.prismaService.vehicle.create({
+			data: {
+				userId: userId,
+				make: 'Unknown',
+				model: 'Unknown'
+			}
 		});
-		return await this.vehiclesRepository.save(newVehicle);
 	}
 
-	async create(createVehicleDto: CreateVehicleDto): Promise<Vehicle> {
-		const vehicle = this.vehiclesRepository.create(createVehicleDto);
-		return await this.vehiclesRepository.save(vehicle);
+	async create(dto: CreateVehicleDto): Promise<Vehicle> {
+		return await this.prismaService.vehicle.create({
+			data: dto
+		});
 	}
 
-	async findAll(): Promise<Vehicle[]> {
-		return await this.vehiclesRepository.find();
-	}
+	// async findAll(): Promise<Vehicle[]> {
+	// 	return await this.prismaService.vehicle.findMany();
+	// }
 
-	async findOne(id: number): Promise<Vehicle> {
-		const vehicle = await this.vehiclesRepository.findOneBy({ id });
+	async findOne(id: string): Promise<Vehicle> {
+		const vehicle = await this.prismaService.vehicle.findUnique({
+			where: { id }
+		});
 		if (!vehicle) {
-			throw new NotFoundException(`Vehicle with ID ${id} not found`);
+			throw new NotFoundException(`Машину з ID ${id} не знайдено`);
 		}
 		return vehicle;
 	}
 
-	async update(id: number, updateVehicleDto: UpdateVehicleDto): Promise<Vehicle> {
-		await this.vehiclesRepository.update(id, updateVehicleDto);
-		return this.findOne(id);
+	async update(id: string, dto: UpdateVehicleDto): Promise<Vehicle> {
+		try {
+			return await this.prismaService.vehicle.update({
+				where: { id },
+				data: dto
+			});
+		} catch (error) {
+			throw new NotFoundException(`Неможливо оновити: машину з ID ${id} не знайдено`, error);
+		}
 	}
 
-	async remove(id: number): Promise<void> {
-		const result = await this.vehiclesRepository.delete(id);
-		if (result.affected === 0) {
-			throw new NotFoundException(`Vehicle with ID ${id} not found`);
+	async remove(id: string): Promise<void> {
+		try {
+			await this.prismaService.vehicle.delete({ where: { id } });
+		} catch (error) {
+			throw new NotFoundException(`Неможливо видалити: машину з ID ${id} не знайдено`, error);
 		}
 	}
 }

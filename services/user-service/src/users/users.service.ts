@@ -1,48 +1,57 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
+import { PrismaService } from '../common/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
 	constructor(
-		@InjectRepository(User)
-		private usersRepository: Repository<User>,
+		private readonly prismaService: PrismaService,
 		@Inject('USER_SERVICE') private client: ClientProxy
 	) {}
 
-	async create(createUserDto: CreateUserDto) {
-		const newUser = this.usersRepository.create(createUserDto);
-		const savedUser = await this.usersRepository.save(newUser);
-
-		this.client.emit('user_created', {
-			type: 'USER_CREATED',
-			data: {
-				id: savedUser.id,
-				email: savedUser.email
+	public async me(id: string) {
+		const user = await this.prismaService.user.findUnique({
+			where: {
+				id
 			}
 		});
 
-		return savedUser;
+		return user;
 	}
 
-	findAll() {
-		return this.usersRepository.find();
+	public async create(input: CreateUserDto) {
+		const { email, password, firstName, lastName } = input;
+
+		const isEmailExists = await this.prismaService.user.findUnique({
+			where: {
+				email
+			}
+		});
+
+		if (isEmailExists) {
+			throw new Error('Email already exists');
+		}
+
+		const salt = await bcrypt.genSalt();
+		const hashedPassword = await bcrypt.hash(password, salt);
+
+		const user = await this.prismaService.user.create({
+			data: {
+				email,
+				password: hashedPassword,
+				firstName,
+				lastName
+			}
+		});
+
+		this.client.emit('user.created', user.id);
+
+		return true;
 	}
 
-	findOne(id: number) {
-		return this.usersRepository.findOneBy({ id });
-	}
+	// Change email
 
-	async update(id: number, updateUserDto: UpdateUserDto) {
-		await this.usersRepository.update(id, updateUserDto);
-		return this.findOne(id);
-	}
-
-	remove(id: number) {
-		return this.usersRepository.delete(id);
-	}
+	// Change password
 }

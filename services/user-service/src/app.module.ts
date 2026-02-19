@@ -1,33 +1,23 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
+import { PrismaModule } from './common/prisma/prisma.module';
+import { RedisModule } from './common/redis/redis.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
 	imports: [
 		ConfigModule.forRoot({
 			isGlobal: true,
-			envFilePath: '../.env'
+			envFilePath: '../../.env'
 		}),
-		TypeOrmModule.forRootAsync({
-			imports: [ConfigModule],
-			inject: [ConfigService],
-			useFactory: (config: ConfigService) => ({
-				type: 'postgres',
-				host: config.get<string>('USER_DB_HOST'),
-				port: config.get<number>('USER_DB_PORT'),
-				username: config.get<string>('USER_DB_USER'),
-				password: config.get<string>('USER_DB_PASS'),
-				database: config.get<string>('USER_DB_NAME'),
-				autoLoadEntities: true,
-				synchronize: true // for dev
-			})
-		}),
-		UsersModule
+		RedisModule,
+		PrismaModule,
+		UsersModule,
+		AuthModule
 	],
-	controllers: [AppController],
-	providers: [AppService]
+	controllers: [],
+	providers: [],
+	exports: []
 })
 export class AppModule {}

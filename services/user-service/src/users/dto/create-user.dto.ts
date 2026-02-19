@@ -1,14 +1,25 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, Matches, MinLength } from 'class-validator';
 
 export class CreateUserDto {
-	@IsEmail({}, { message: 'Введіть коректний email' })
-	@IsNotEmpty({ message: 'Email є обов’язковим полем' })
+	@IsString()
+	@IsNotEmpty()
+	@IsEmail()
 	email: string;
 
 	@IsString()
-	@MinLength(2, { message: 'Ім’я має бути не коротше за 2 символи' })
+	@IsNotEmpty()
+	@Matches(/^[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*$/)
+	@MinLength(2)
 	firstName?: string;
 
 	@IsString()
+	@IsNotEmpty()
+	@Matches(/^[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*$/)
+	@MinLength(2)
 	lastName?: string;
+
+	@IsString()
+	@IsNotEmpty()
+	@MinLength(8)
+	public password: string;
 }
