@@ -5,7 +5,7 @@ import type { Request } from 'express';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { RedisService } from 'src/common/redis/redis.service';
 import { getSessionMetadata } from 'src/common/utils/session-metadata.util';
-import { saveSession } from 'src/common/utils/session.util';
+import { destroySession, saveSession } from 'src/common/utils/session.util';
 import { LoginDto } from './dto/login.dto';
 
 @Injectable()
@@ -33,5 +33,21 @@ export class AuthService {
 		const metadata = getSessionMetadata(req, userAgent);
 
 		return saveSession(req, user, metadata);
+	}
+
+	public async getMe(req: Request) {
+		const userId = req.session.userId;
+		if (!userId) throw new UnauthorizedException('Not authorized');
+		const user = await this.prismaService.user.findUnique({ where: { id: userId } });
+
+		if (!user) {
+			throw new NotFoundException('User not found');
+		}
+
+		return user;
+	}
+
+	public async logout(req: Request) {
+		return destroySession(req, this.configService);
 	}
 }

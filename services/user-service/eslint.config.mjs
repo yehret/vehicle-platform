@@ -26,6 +26,13 @@ export default tseslint.config(
 	},
 	{
 		rules: {
+			'@typescript-eslint/no-unused-vars': [
+				'error',
+				{
+					varsIgnorePattern: '^_',
+					argsIgnorePattern: '^_'
+				}
+			],
 			'@typescript-eslint/no-require-imports': 'off',
 			'@typescript-eslint/no-unsafe-call': 'off',
 			'@typescript-eslint/no-unsafe-member-access': 'off',

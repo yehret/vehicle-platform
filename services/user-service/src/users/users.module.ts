@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { OwnerGuard } from 'src/auth/guards/owner.guard';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
@@ -25,6 +27,6 @@ import { UsersService } from './users.service';
 		])
 	],
 	controllers: [UsersController],
-	providers: [UsersService]
+	providers: [UsersService, AuthGuard, OwnerGuard]
 })
 export class UsersModule {}
