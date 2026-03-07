@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../common/prisma/prisma.service';
@@ -23,27 +23,29 @@ export class UsersService {
 	}
 
 	public async create(input: CreateUserDto) {
-		const { email, password, firstName, lastName } = input;
+		const { email, password, firstName, lastName, role } = input;
 
 		const isEmailExists = await this.prismaService.user.findUnique({
-			where: {
-				email
-			}
+			where: { email }
 		});
 
 		if (isEmailExists) {
-			throw new NotFoundException('Email already exists');
+			throw new ConflictException('Email already exists');
 		}
 
-		const salt = await bcrypt.genSalt();
-		const hashedPassword = await bcrypt.hash(password, salt);
+		let hashedPassword: string | null = null;
+		if (password) {
+			const salt = await bcrypt.genSalt();
+			hashedPassword = await bcrypt.hash(password, salt);
+		}
 
 		const user = await this.prismaService.user.create({
 			data: {
 				email,
 				password: hashedPassword,
 				firstName,
-				lastName
+				lastName,
+				role: role || 'USER'
 			}
 		});
 

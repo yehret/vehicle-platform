@@ -1,17 +1,24 @@
 generator client {
-  provider = "prisma-client-js"
+   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+   provider = "postgresql"
+   url      = "postgresql://user_admin:password@localhost:5433/user_db?schema=public"
+}
+
+enum Role {
+   USER
+   ADMIN
 }
 
 model User {
-  id        String  @id @default(uuid())
-  email     String   @unique
-  password  String
-  firstName String?
-  lastName  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+   id        String   @id @default(uuid())
+   email     String   @unique
+   password  String?
+   role      Role     @default(USER)
+   firstName String?
+   lastName  String?
+   createdAt DateTime @default(now())
+   updatedAt DateTime @updatedAt
 }

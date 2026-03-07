@@ -2,7 +2,6 @@ import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from 
 import { EventPattern, Payload } from '@nestjs/microservices';
 import type { Request } from 'express';
 import { AuthGuard } from 'src/common/guards/auth.guard';
-import { VehicleOwnerGuard } from 'src/common/guards/vehicleOwner.guard';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { VehiclesService } from './vehicles.service';
@@ -24,23 +23,25 @@ export class VehiclesController {
 	}
 
 	@Get()
+	@UseGuards(AuthGuard)
 	findAll() {
 		return this.vehiclesService.findAll();
 	}
 
 	@Get(':id')
+	@UseGuards(AuthGuard)
 	findOne(@Param('id') id: string) {
 		return this.vehiclesService.findOne(id);
 	}
 
 	@Put(':id')
-	@UseGuards(AuthGuard, VehicleOwnerGuard)
+	@UseGuards(AuthGuard)
 	update(@Param('id') id: string, @Body() updateVehicleDto: UpdateVehicleDto) {
 		return this.vehiclesService.update(id, updateVehicleDto);
 	}
 
 	@Delete(':id')
-	@UseGuards(AuthGuard, VehicleOwnerGuard)
+	@UseGuards(AuthGuard)
 	remove(@Param('id') id: string) {
 		return this.vehiclesService.remove(id);
 	}

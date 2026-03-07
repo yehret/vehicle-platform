@@ -19,12 +19,14 @@ export class AuthService {
 	public async login(req: Request, input: LoginDto, userAgent: string) {
 		const { email, password } = input;
 		const user = await this.prismaService.user.findFirst({
-			where: {
-				email
-			}
+			where: { email }
 		});
 
 		if (!user) throw new NotFoundException('User not found');
+
+		if (!user.password || user.role !== 'ADMIN') {
+			throw new UnauthorizedException('Access denied: You do not have manager privileges');
+		}
 
 		const isValidPassword = await bcrypt.compare(password, user.password);
 
