@@ -2,7 +2,7 @@ import type { Request } from 'express';
 import { lookup } from 'geoip-lite';
 import * as countries from 'i18n-iso-countries';
 
-import type { SessionMetadata } from '../types/session-metadata.types';
+import type { SessionMetadata } from '../../types/session-metadata.types';
 
 // @typescript-eslint/no-require-imports
 import DeviceDetector = require('device-detector-js');

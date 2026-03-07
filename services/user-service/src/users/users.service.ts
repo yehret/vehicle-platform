@@ -32,7 +32,7 @@ export class UsersService {
 		});
 
 		if (isEmailExists) {
-			throw new Error('Email already exists');
+			throw new NotFoundException('Email already exists');
 		}
 
 		const salt = await bcrypt.genSalt();
@@ -60,7 +60,7 @@ export class UsersService {
 
 	public async findOne(id: string) {
 		const user = await this.prismaService.user.findUnique({ where: { id } });
-		if (!user) throw new NotFoundException('Користувача не знайдено');
+		if (!user) throw new NotFoundException('User not found');
 
 		const { password: _password, ...result } = user;
 		return result;

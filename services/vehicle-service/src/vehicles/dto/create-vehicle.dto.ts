@@ -14,8 +14,4 @@ export class CreateVehicleDto {
 	@Max(new Date().getFullYear() + 1)
 	@IsOptional()
 	year?: number;
-
-	@IsString()
-	@IsNotEmpty()
-	userId: string;
 }

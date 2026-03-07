@@ -4,8 +4,8 @@ import * as bcrypt from 'bcrypt';
 import type { Request } from 'express';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { RedisService } from 'src/common/redis/redis.service';
-import { getSessionMetadata } from 'src/common/utils/session-metadata.util';
-import { destroySession, saveSession } from 'src/common/utils/session.util';
+import { getSessionMetadata } from '../common/utils/session-metadata.util';
+import { destroySession, saveSession } from '../common/utils/session.util';
 import { LoginDto } from './dto/login.dto';
 
 @Injectable()

@@ -8,7 +8,7 @@ import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 export class VehiclesService {
 	constructor(private readonly prismaService: PrismaService) {}
 
-	async createEmptyForUser(userId: string): Promise<Vehicle> {
+	async createEmpty(userId: string): Promise<Vehicle> {
 		return await this.prismaService.vehicle.create({
 			data: {
 				userId: userId,
@@ -18,22 +18,29 @@ export class VehiclesService {
 		});
 	}
 
-	async create(dto: CreateVehicleDto): Promise<Vehicle> {
+	async create(userId: string, dto: CreateVehicleDto): Promise<Vehicle> {
+		if (!userId) {
+			throw new NotFoundException('User not found');
+		}
+
 		return await this.prismaService.vehicle.create({
-			data: dto
+			data: {
+				...dto,
+				userId
+			}
 		});
 	}
 
-	// async findAll(): Promise<Vehicle[]> {
-	// 	return await this.prismaService.vehicle.findMany();
-	// }
+	async findAll(): Promise<Vehicle[]> {
+		return await this.prismaService.vehicle.findMany();
+	}
 
 	async findOne(id: string): Promise<Vehicle> {
 		const vehicle = await this.prismaService.vehicle.findUnique({
 			where: { id }
 		});
 		if (!vehicle) {
-			throw new NotFoundException(`Машину з ID ${id} не знайдено`);
+			throw new NotFoundException(`Not Found`);
 		}
 		return vehicle;
 	}
@@ -45,7 +52,7 @@ export class VehiclesService {
 				data: dto
 			});
 		} catch (error) {
-			throw new NotFoundException(`Неможливо оновити: машину з ID ${id} не знайдено`, error);
+			throw new NotFoundException(`Can't update. Vehicle not found`, error);
 		}
 	}
 
@@ -53,7 +60,7 @@ export class VehiclesService {
 		try {
 			await this.prismaService.vehicle.delete({ where: { id } });
 		} catch (error) {
-			throw new NotFoundException(`Неможливо видалити: машину з ID ${id} не знайдено`, error);
+			throw new NotFoundException(`Can't delete. Vehicle not found`, error);
 		}
 	}
 }

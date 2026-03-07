@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import type { Request } from 'express';
 
 import { User } from '@prisma/client';
-import type { SessionMetadata } from '../types/session-metadata.types';
+import type { SessionMetadata } from '../../types/session-metadata.types';
 
 declare module 'express-session' {
 	interface SessionData {
