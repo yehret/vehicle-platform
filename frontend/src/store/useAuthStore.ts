@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { apiClient } from '../api/axios';
+import { userClient } from '../api/userClient';
 import type { User } from '../types/User';
 
 interface LoginCredentials {
@@ -22,7 +22,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   checkAuth: async () => {
     try {
       set({ isLoading: true });
-      const { data } = await apiClient.get<User>('/auth/me');
+      const { data } = await userClient.get<User>('/auth/me');
       set({ user: data, isLoading: false });
     } catch {
       set({ user: null, isLoading: false });
@@ -30,16 +30,26 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   login: async (credentials) => {
-    await apiClient.post('/auth/login', credentials);
-    const { data } = await apiClient.get<User>('/auth/me');
-    set({ user: data });
+    set({ isLoading: true });
+    try {
+      await userClient.post('/auth/login', credentials);
+      const { data } = await userClient.get<User>('/auth/me');
+      set({ user: data, isLoading: false });
+    } catch (error) {
+      set({ isLoading: false });
+      throw error;
+    }
   },
 
   logout: async () => {
+    set({ isLoading: true });
     try {
-      await apiClient.post('/auth/logout');
+      await userClient.post('/auth/logout');
+    } catch (error) {
+      console.error('Logout error:', error);
     } finally {
-      set({ user: null });
+      set({ user: null, isLoading: false });
+
       window.location.href = '/login';
     }
   },

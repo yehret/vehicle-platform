@@ -1,6 +1,5 @@
-import { Delete as DeleteIcon, Info as InfoIcon, Logout as LogoutIcon } from '@mui/icons-material';
+import { Delete as DeleteIcon, Info as InfoIcon } from '@mui/icons-material';
 import {
-  Avatar,
   Box,
   Button,
   CircularProgress,
@@ -15,10 +14,9 @@ import {
   Typography,
 } from '@mui/material';
 import { AxiosError } from 'axios';
-import { useEffect, useState } from 'react';
-import { apiClient } from '../api/axios';
+import { useCallback, useEffect, useState } from 'react';
+import { userClient } from '../api/userClient';
 import UserDialog from '../components/UserDialog';
-import { useAuthStore } from '../store/useAuthStore';
 import type { User } from '../types/User';
 
 export default function UsersPage() {
@@ -27,154 +25,135 @@ export default function UsersPage() {
   const [error, setError] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { user: admin, logout } = useAuthStore();
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
-      const response = await apiClient.get<User[]>('/users');
+      const response = await userClient.get<User[]>('/users');
       setUsers(response.data);
     } catch (err) {
       const axiosError = err as AxiosError<{ message: string }>;
-      setError(axiosError.response?.data?.message || 'Помилка при завантаженні користувачів');
+      setError(axiosError.response?.data?.message || 'Помилка завантаження');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [fetchUsers]);
 
   const handleDelete = async (id: string) => {
     if (!window.confirm('Ви впевнені, що хочете видалити цього користувача?')) return;
-
     try {
-      await apiClient.delete(`/users/${id}`);
+      await userClient.delete(`/users/${id}`);
       setUsers((prev) => prev.filter((u) => u.id !== id));
     } catch (err) {
       alert('Не вдалося видалити користувача');
+      console.error(err);
     }
   };
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4">
-      <Box className="flex justify-between items-center mb-8 p-4 bg-white shadow-sm border border-gray-100 rounded-2xl">
-        <Box className="flex items-center gap-4">
-          <Avatar sx={{ bgcolor: 'primary.main', fontWeight: 'bold' }}>
-            {admin?.firstName?.[0] || admin?.email?.[0].toUpperCase()}
-          </Avatar>
+    <Box className="min-h-screen bg-slate-950 py-8 px-4">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-10">
           <Box>
-            <Typography variant="subtitle1" className="font-bold text-gray-800">
-              {admin?.firstName} {admin?.lastName}
+            <Typography
+              variant="h3"
+              className="text-white font-black tracking-tighter uppercase italic leading-none"
+            >
+              Клієнти <span className="text-orange-500">.DB</span>
             </Typography>
-            <Typography variant="caption" className="text-gray-500 block">
-              Менеджер системи • {admin?.email}
+            <Typography
+              variant="body2"
+              className="text-slate-500 mt-2 font-medium uppercase tracking-widest"
+            >
+              Керування базою даних користувачів сервісу
             </Typography>
           </Box>
-        </Box>
-        <Button
-          variant="outlined"
-          color="error"
-          size="small"
-          startIcon={<LogoutIcon />}
-          onClick={logout}
-          className="rounded-lg font-bold"
-        >
-          Вийти
-        </Button>
-      </Box>
 
-      <div className="flex justify-between items-center mb-6">
-        <Typography variant="h4" className="text-gray-900 font-black tracking-tight">
-          Клієнти
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => setIsModalOpen(true)}
-          className="rounded-xl px-6 py-2 shadow-lg shadow-blue-200 normal-case font-bold"
-        >
-          + Створити користувача
-        </Button>
-      </div>
-
-      {loading && (
-        <div className="flex justify-center items-center h-64">
-          <CircularProgress size={60} thickness={4} />
+          <Button
+            variant="contained"
+            onClick={() => setIsModalOpen(true)}
+            className="bg-orange-500 hover:bg-orange-600 text-slate-950 rounded-xl px-8 py-3 shadow-lg shadow-orange-500/20 normal-case font-black italic"
+          >
+            + ДОДАТИ КЛІЄНТА
+          </Button>
         </div>
-      )}
 
-      {error && (
-        <Paper className="p-4 bg-red-50 border border-red-100 mb-6">
-          <Typography color="error" className="font-medium text-center">
-            ⚠️ {error}
-          </Typography>
-        </Paper>
-      )}
-
-      {!loading && !error && (
-        <TableContainer
-          component={Paper}
-          className="shadow-xl rounded-2xl overflow-hidden border border-gray-100"
-        >
-          <Table>
-            <TableHead className="bg-gray-50">
-              <TableRow>
-                <TableCell className="font-bold text-gray-600">ID</TableCell>
-                <TableCell className="font-bold text-gray-600">Email</TableCell>
-                <TableCell className="font-bold text-gray-600">Ім'я та Прізвище</TableCell>
-                <TableCell className="font-bold text-gray-600" align="right">
-                  Дії
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {users.length === 0 ? (
+        {loading ? (
+          <Box className="flex justify-center items-center h-64">
+            <CircularProgress color="primary" thickness={5} size={60} />
+          </Box>
+        ) : error ? (
+          <Paper className="p-8 bg-red-500/10 border border-red-500/20 rounded-3xl text-center">
+            <Typography color="error" className="font-bold">
+              ⚠️ {error}
+            </Typography>
+          </Paper>
+        ) : (
+          <TableContainer
+            component={Paper}
+            className="bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden"
+          >
+            <Table>
+              <TableHead className="bg-slate-800/50">
                 <TableRow>
-                  <TableCell colSpan={4} align="center" className="py-20 text-gray-400">
-                    <Typography variant="body1">Список користувачів порожній</Typography>
+                  <TableCell className="text-slate-500 font-bold uppercase text-xs">ID</TableCell>
+                  <TableCell className="text-slate-300 font-bold uppercase text-xs">
+                    Email адреса
+                  </TableCell>
+                  <TableCell className="text-slate-300 font-bold uppercase text-xs">
+                    ПІБ Клієнта
+                  </TableCell>
+                  <TableCell align="right" className="text-slate-500 font-bold uppercase text-xs">
+                    Дії
                   </TableCell>
                 </TableRow>
-              ) : (
-                users.map((user) => (
-                  <TableRow key={user.id} className="hover:bg-blue-50/30 transition-colors">
-                    <TableCell className="font-mono text-xs text-gray-400">
+              </TableHead>
+              <TableBody>
+                {users.map((user) => (
+                  <TableRow key={user.id} className="hover:bg-slate-800/30 transition-colors">
+                    <TableCell className="font-mono text-[10px] text-slate-600">
                       #{user.id.substring(0, 8)}
                     </TableCell>
-                    <TableCell className="font-medium">{user.email}</TableCell>
-                    <TableCell>
+                    <TableCell className="text-white font-medium">{user.email}</TableCell>
+                    <TableCell className="text-slate-400">
                       {user.firstName || user.lastName ? (
-                        `${user.firstName || ''} ${user.lastName || ''}`
+                        <span className="text-white font-bold">
+                          {user.firstName} {user.lastName}
+                        </span>
                       ) : (
-                        <span className="text-gray-300">—</span>
+                        <span className="italic text-slate-600 text-sm">Дані не заповнені</span>
                       )}
                     </TableCell>
                     <TableCell align="right">
-                      <Box className="flex justify-end gap-1">
-                        <IconButton color="info" size="small" title="Деталі">
+                      <Box className="flex justify-end gap-2">
+                        <IconButton
+                          size="small"
+                          className="text-slate-500 hover:text-orange-500 transition-colors"
+                        >
                           <InfoIcon fontSize="small" />
                         </IconButton>
                         <IconButton
-                          color="error"
                           size="small"
-                          title="Видалити"
-                          onClick={() => handleDelete}
+                          className="text-slate-500 hover:text-red-500 transition-colors"
+                          onClick={() => handleDelete(user.id)}
                         >
                           <DeleteIcon fontSize="small" />
                         </IconButton>
                       </Box>
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </div>
 
       <UserDialog open={isModalOpen} onClose={() => setIsModalOpen(false)} onSuccess={fetchUsers} />
-    </div>
+    </Box>
   );
 }

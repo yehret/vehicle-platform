@@ -15,6 +15,13 @@ async function bootstrap() {
 	const configService = app.get(ConfigService);
 	const redisClient = app.get(RedisService);
 
+	app.enableCors({
+		origin: configService.getOrThrow<string>('ALLOWED_ORIGIN'),
+		credentials: true,
+		methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+		allowedHeaders: 'Content-Type, Accept, Authorization'
+	});
+
 	app.connectMicroservice<MicroserviceOptions>({
 		transport: Transport.RMQ,
 		options: {

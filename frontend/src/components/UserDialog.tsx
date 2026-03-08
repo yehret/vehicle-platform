@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
+  Box,
   Button,
   CircularProgress,
   Dialog,
@@ -13,7 +14,7 @@ import { AxiosError } from 'axios';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { apiClient } from '../api/axios';
+import { userClient } from '../api/userClient';
 
 const userSchema = z.object({
   email: z.string().email('Введіть коректну email адресу'),
@@ -47,7 +48,7 @@ export default function UserDialog({ open, onClose, onSuccess }: UserDialogProps
     try {
       setLoading(true);
       setApiError('');
-      await apiClient.post('/users', data);
+      await userClient.post('/users', data);
 
       reset();
       onSuccess();
@@ -72,36 +73,46 @@ export default function UserDialog({ open, onClose, onSuccess }: UserDialogProps
       onClose={handleClose}
       fullWidth
       maxWidth="xs"
-      PaperProps={{ sx: { borderRadius: 4, p: 1 } }}
+      // Стилізуємо саме вікно діалогу під темну тему
+      PaperProps={{
+        sx: {
+          borderRadius: 5,
+          bgcolor: '#0f172a',
+          backgroundImage: 'none',
+          border: '1px solid #1e293b',
+        },
+      }}
     >
-      <DialogTitle className="font-black text-2xl text-gray-800">Новий клієнт</DialogTitle>
+      <DialogTitle className="font-black text-2xl text-white italic uppercase pt-6">
+        Новий <span className="text-orange-500">клієнт</span>
+      </DialogTitle>
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        <DialogContent className="flex flex-col gap-5">
+        <DialogContent className="flex flex-col gap-5 pt-2">
           {apiError && (
-            <Typography className="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-100">
+            <Typography className="text-red-500 text-sm bg-red-500/10 p-3 rounded-xl border border-red-500/20">
               {apiError}
             </Typography>
           )}
 
           <TextField
             label="Email адреса"
-            variant="filled"
+            variant="outlined"
             fullWidth
             {...register('email')}
             error={!!errors.email}
             helperText={errors.email?.message}
           />
 
-          <div className="flex gap-4">
-            <TextField label="Ім'я" variant="filled" fullWidth {...register('firstName')} />
-            <TextField label="Прізвище" variant="filled" fullWidth {...register('lastName')} />
-          </div>
+          <Box className="flex gap-4">
+            <TextField label="Ім'я" variant="outlined" fullWidth {...register('firstName')} />
+            <TextField label="Прізвище" variant="outlined" fullWidth {...register('lastName')} />
+          </Box>
 
           <TextField
             label="Пароль для клієнта"
             type="password"
-            variant="filled"
+            variant="outlined"
             fullWidth
             {...register('password')}
             error={!!errors.password}
@@ -109,18 +120,18 @@ export default function UserDialog({ open, onClose, onSuccess }: UserDialogProps
           />
         </DialogContent>
 
-        <DialogActions className="p-6">
-          <Button onClick={handleClose} color="inherit" disabled={loading} className="font-bold">
+        <DialogActions className="p-8 pt-4">
+          <Button onClick={handleClose} className="text-slate-400 font-bold hover:text-white">
             Скасувати
           </Button>
           <Button
             type="submit"
             variant="contained"
             disabled={loading}
-            className="px-8 rounded-xl font-bold"
+            className="px-8 py-2.5 bg-orange-500 hover:bg-orange-600 text-slate-950 font-black rounded-xl"
             startIcon={loading && <CircularProgress size={20} color="inherit" />}
           >
-            Зберегти клієнта
+            ЗБЕРЕГТИ
           </Button>
         </DialogActions>
       </form>

@@ -33,8 +33,8 @@ export default function LoginPage() {
       setLoading(true);
       setApiError('');
       await login(data);
-      navigate('/users');
-    } catch (err: any) {
+      navigate('/vehicles');
+    } catch (err) {
       const error = err as AxiosError<{ message: string }>;
       setApiError(error.response?.data?.message || 'Помилка авторизації');
     } finally {
@@ -43,24 +43,32 @@ export default function LoginPage() {
   };
 
   return (
-    <Box className="flex justify-center min-h-screen bg-gray-50">
-      <Paper className="p-10 w-full max-w-md shadow-2xl rounded-2xl">
-        <Typography variant="h4" className="mb-2 font-bold text-center text-blue-600">
-          Вхід
+    <Box className="flex items-center justify-center min-h-[calc(100vh-64px)] bg-slate-950 px-4">
+      <Paper className="p-10 w-full max-w-md bg-slate-900 border border-slate-800 shadow-2xl rounded-3xl">
+        <Typography
+          variant="h4"
+          className="mb-2 font-black text-center text-white uppercase italic tracking-tighter"
+        >
+          VEHICLE<span className="text-orange-500">SERVICE</span>
         </Typography>
-        <Typography variant="body2" className="mb-8 text-center text-gray-500">
-          Панель керування автосервісом
+        <Typography
+          variant="body2"
+          sx={{ mb: 2 }}
+          className="text-center text-slate-500 font-medium uppercase tracking-widest text-xs"
+        >
+          Панель керування сервісом
         </Typography>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
           {apiError && (
-            <Typography color="error" className="text-center font-medium bg-red-50 p-2 rounded">
+            <Typography className="text-center font-bold text-red-500 bg-red-500/10 p-3 rounded-xl border border-red-500/20 text-sm">
               {apiError}
             </Typography>
           )}
 
           <TextField
             label="Email"
+            variant="outlined"
             fullWidth
             {...register('email')}
             error={!!errors.email}
@@ -70,6 +78,7 @@ export default function LoginPage() {
           <TextField
             label="Пароль"
             type="password"
+            variant="outlined"
             fullWidth
             {...register('password')}
             error={!!errors.password}
@@ -81,9 +90,9 @@ export default function LoginPage() {
             type="submit"
             size="large"
             disabled={loading}
-            className="py-3 mt-2 bg-blue-600 hover:bg-blue-700"
+            className="py-4 mt-2 bg-orange-500 hover:bg-orange-600 text-slate-950 font-black rounded-xl shadow-lg shadow-orange-500/20 transition-all"
           >
-            {loading ? <CircularProgress size={24} /> : 'Увійти'}
+            {loading ? <CircularProgress size={26} color="inherit" /> : 'УВІЙТИ'}
           </Button>
         </form>
       </Paper>

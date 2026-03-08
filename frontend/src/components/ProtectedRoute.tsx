@@ -8,7 +8,7 @@ export const ProtectedRoute = () => {
 
   useEffect(() => {
     if (!user) checkAuth();
-  }, []);
+  }, [user, checkAuth]);
 
   if (isLoading) {
     return (

@@ -46,7 +46,9 @@ export class AuthService {
 			throw new NotFoundException('User not found');
 		}
 
-		return user;
+		const { password: _password, ...result } = user;
+
+		return result;
 	}
 
 	public async logout(req: Request) {
