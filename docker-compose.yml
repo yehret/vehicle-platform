@@ -61,11 +61,13 @@ services:
     build: ./services/user-service
     container_name: vehicleservice-user-api
     restart: always
+    env_file:
+      - .env
     environment:
+      - USER_PORT=3000
       - DATABASE_URL=postgresql://user_admin:${POSTGRES_PASSWORD:-password}@user-db:5432/user_db
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
       - REDIS_HOST=redis
-      - PORT=3000
     depends_on:
       user-db:
         condition: service_healthy
@@ -78,10 +80,12 @@ services:
     build: ./services/vehicle-service
     container_name: vehicleservice-vehicle-api
     restart: always
+    env_file:
+      - .env
     environment:
+      - VEHICLE_PORT=3000
       - DATABASE_URL=postgresql://vehicle_admin:${POSTGRES_PASSWORD:-password}@vehicle-db:5432/vehicle_db
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
-      - VEHICLE_PORT=3000
       - ALLOWED_ORIGIN=${ALLOWED_ORIGIN:-http://localhost:5173}
     depends_on:
       vehicle-db:
