@@ -5,14 +5,55 @@ on:
     branches:
       - master
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME_USER: ghcr.io/yehret/user-service
+  IMAGE_NAME_VEHICLE: ghcr.io/yehret/vehicle-service
+  IMAGE_NAME_WEB: ghcr.io/yehret/frontend
+
 jobs:
-  deploy:
+  build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push User Service
+        uses: docker/build-push-action@v4
+        with:
+          context: ./services/user-service
+          push: true
+          tags: ${{ env.IMAGE_NAME_USER }}:latest
+
+      - name: Build and push Vehicle Service
+        uses: docker/build-push-action@v4
+        with:
+          context: ./services/vehicle-service
+          push: true
+          tags: ${{ env.IMAGE_NAME_VEHICLE }}:latest
+
+      - name: Build and push Frontend
+        uses: docker/build-push-action@v4
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ env.IMAGE_NAME_WEB }}:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy to Server via SSH
         uses: appleboy/ssh-action@master
         with:
@@ -22,17 +63,7 @@ jobs:
           script: |
             cd ~/vehicle-platform
             git pull origin master
-
-            docker image prune -f
-
-            docker-compose up -d user-db vehicle-db redis rabbitmq
-
-            docker-compose up -d --build user-service
-            sleep 5
-
-            docker-compose up -d --build vehicle-service
-            sleep 5
-
-            docker-compose up -d --build frontend
-
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker-compose pull
+            docker-compose up -d
             docker image prune -f

@@ -58,7 +58,8 @@ services:
       - '6380:6379'
 
   user-service:
-    build: ./services/user-service
+    image: ghcr.io/yehret/user-service:latest
+    #build: ./services/user-service
     container_name: vehicleservice-user-api
     restart: always
     env_file:
@@ -77,7 +78,8 @@ services:
         condition: service_started
 
   vehicle-service:
-    build: ./services/vehicle-service
+    image: ghcr.io/yehret/vehicle-service:latest
+    #build: ./services/vehicle-service
     container_name: vehicleservice-vehicle-api
     restart: always
     env_file:
@@ -94,7 +96,8 @@ services:
         condition: service_healthy
 
   frontend:
-    build: ./frontend
+    image: ghcr.io/yehret/frontend:latest
+    #build: ./frontend
     container_name: vehicleservice-web
     ports:
       - '80:80'
