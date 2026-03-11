@@ -60,8 +60,11 @@ export default function VehiclesPage() {
 
   const getOwnerName = useCallback(
     (userId: string) => {
+      if (!Array.isArray(users)) return 'Завантаження...';
+
       const owner = users.find((u) => u.id === userId);
       if (!owner) return 'Невідомий';
+
       return owner.firstName || owner.lastName
         ? `${owner.firstName || ''} ${owner.lastName || ''}`.trim()
         : owner.email;
