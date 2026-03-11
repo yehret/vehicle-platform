@@ -4,6 +4,12 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+
+ARG VITE_API_URL_USER
+ARG VITE_API_URL_VEHICLE
+ENV VITE_API_URL_USER=$VITE_API_URL_USER
+ENV VITE_API_URL_VEHICLE=$VITE_API_URL_VEHICLE
+
 RUN npm run build
 
 # Production stage

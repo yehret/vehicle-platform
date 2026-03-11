@@ -49,6 +49,9 @@ jobs:
           context: ./frontend
           push: true
           tags: ${{ env.IMAGE_NAME_WEB }}:latest
+          build-args: |
+            VITE_API_URL_USER=http://13.60.31.232/api
+            VITE_API_URL_VEHICLE=http://13.60.31.232/api
 
   deploy:
     needs: build-and-push
