@@ -3,7 +3,7 @@ name: Deploy to EC2
 on:
   push:
     branches:
-      - master # Або main, залежно від твоєї гілки
+      - master
 
 jobs:
   deploy:

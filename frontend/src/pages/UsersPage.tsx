@@ -73,7 +73,7 @@ export default function UsersPage() {
               variant="h3"
               className="text-white font-black tracking-tighter uppercase italic leading-none"
             >
-              Клієнти <span className="text-orange-500">.DB</span>
+              TEST Клієнти <span className="text-orange-500">.DB</span>
             </Typography>
             <Typography
               variant="body2"
