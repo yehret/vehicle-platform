@@ -12,7 +12,7 @@ export const VehicleRowItem = ({ vehicle, ownerName, onEdit }: VehicleRowItemPro
   return (
     <TableRow key={vehicle.id} className="hover:bg-slate-800/30 transition-colors">
       <TableCell className="font-mono text-[10px] text-slate-600">
-        #{vehicle.id.split('-')[0]}
+        #{vehicle?.id?.split('-')[0] || 'N/A'}
       </TableCell>
 
       <TableCell>
