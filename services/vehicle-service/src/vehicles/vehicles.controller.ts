@@ -21,8 +21,9 @@ export class VehiclesController {
 	}
 
 	@EventPattern('user.deleted')
-	handleUserDeleted(@Payload() data: any) {
-		console.log('Caught user.deleted event!', data);
+	async handleUserDeleted(@Payload() userId: string) {
+		console.log('Caught user.deleted event!', userId);
+		await this.vehiclesService.remove(userId);
 	}
 
 	@Post()
