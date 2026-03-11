@@ -18,6 +18,12 @@ async function bootstrap() {
 
 	const redisClient: Redis = app.get(RedisService);
 
+	app.enableCors({
+		origin: config.getOrThrow<string>('ALLOWED_ORIGIN'),
+		credentials: true,
+		exposedHeaders: ['set-cookie']
+	});
+
 	app.use(cookieParser(config.getOrThrow<string>('COOKIES_SECRET')));
 
 	app.useGlobalPipes(
@@ -61,12 +67,6 @@ async function bootstrap() {
 
 	app.use(passport.initialize());
 	app.use(passport.session());
-
-	app.enableCors({
-		origin: config.getOrThrow<string>('ALLOWED_ORIGIN'),
-		credentials: true,
-		exposedHeaders: ['set-cookie']
-	});
 
 	const port = config.get<number>('USER_PORT') || 3001;
 	await app.listen(port);

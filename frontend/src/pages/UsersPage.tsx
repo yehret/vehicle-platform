@@ -1,9 +1,7 @@
-import { Delete as DeleteIcon, Info as InfoIcon } from '@mui/icons-material';
 import {
   Box,
   Button,
   CircularProgress,
-  IconButton,
   Paper,
   Table,
   TableBody,
@@ -15,8 +13,11 @@ import {
 } from '@mui/material';
 import { AxiosError } from 'axios';
 import { useCallback, useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import { userClient } from '../api/userClient';
 import UserDialog from '../components/UserDialog';
+import UserProfileDialog from '../components/UserProfileDialog';
+import { UserRowItem } from '../components/UserRowItem';
 import type { User } from '../types/User';
 
 export default function UsersPage() {
@@ -24,6 +25,9 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -48,10 +52,16 @@ export default function UsersPage() {
     try {
       await userClient.delete(`/users/${id}`);
       setUsers((prev) => prev.filter((u) => u.id !== id));
+      toast.success('Користувача видалено');
     } catch (err) {
-      alert('Не вдалося видалити користувача');
       console.error(err);
+      toast.error('Не вдалося видалити користувача');
     }
+  };
+
+  const handleOpenInfo = (user: User) => {
+    setSelectedUser(user);
+    setIsInfoModalOpen(true);
   };
 
   return (
@@ -114,38 +124,12 @@ export default function UsersPage() {
               </TableHead>
               <TableBody>
                 {users.map((user) => (
-                  <TableRow key={user.id} className="hover:bg-slate-800/30 transition-colors">
-                    <TableCell className="font-mono text-[10px] text-slate-600">
-                      #{user.id.substring(0, 8)}
-                    </TableCell>
-                    <TableCell className="text-white font-medium">{user.email}</TableCell>
-                    <TableCell className="text-slate-400">
-                      {user.firstName || user.lastName ? (
-                        <span className="text-white font-bold">
-                          {user.firstName} {user.lastName}
-                        </span>
-                      ) : (
-                        <span className="italic text-slate-600 text-sm">Дані не заповнені</span>
-                      )}
-                    </TableCell>
-                    <TableCell align="right">
-                      <Box className="flex justify-end gap-2">
-                        <IconButton
-                          size="small"
-                          className="text-slate-500 hover:text-orange-500 transition-colors"
-                        >
-                          <InfoIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          className="text-slate-500 hover:text-red-500 transition-colors"
-                          onClick={() => handleDelete(user.id)}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
+                  <UserRowItem
+                    user={user}
+                    key={user.id}
+                    onDelete={handleDelete}
+                    onInfo={handleOpenInfo}
+                  />
                 ))}
               </TableBody>
             </Table>
@@ -154,6 +138,14 @@ export default function UsersPage() {
       </div>
 
       <UserDialog open={isModalOpen} onClose={() => setIsModalOpen(false)} onSuccess={fetchUsers} />
+      {selectedUser && (
+        <UserProfileDialog
+          open={isInfoModalOpen}
+          user={selectedUser}
+          onClose={() => setIsInfoModalOpen(false)}
+          onUpdate={fetchUsers}
+        />
+      )}
     </Box>
   );
 }

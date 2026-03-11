@@ -68,21 +68,7 @@ export default function UserDialog({ open, onClose, onSuccess }: UserDialogProps
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      fullWidth
-      maxWidth="xs"
-      // Стилізуємо саме вікно діалогу під темну тему
-      PaperProps={{
-        sx: {
-          borderRadius: 5,
-          bgcolor: '#0f172a',
-          backgroundImage: 'none',
-          border: '1px solid #1e293b',
-        },
-      }}
-    >
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs">
       <DialogTitle className="font-black text-2xl text-white italic uppercase pt-6">
         Новий <span className="text-orange-500">клієнт</span>
       </DialogTitle>

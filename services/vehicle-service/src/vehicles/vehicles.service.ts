@@ -18,7 +18,7 @@ export class VehiclesService {
 		});
 	}
 
-	async create(userId: string, dto: CreateVehicleDto): Promise<Vehicle> {
+	async create(dto: CreateVehicleDto, userId: string): Promise<Vehicle> {
 		if (!userId) {
 			throw new NotFoundException('User not found');
 		}
@@ -31,8 +31,11 @@ export class VehiclesService {
 		});
 	}
 
-	async findAll(): Promise<Vehicle[]> {
-		return await this.prismaService.vehicle.findMany();
+	async findAll(userId?: string): Promise<Vehicle[]> {
+		return await this.prismaService.vehicle.findMany({
+			where: userId ? { userId } : {},
+			orderBy: { createdAt: 'desc' }
+		});
 	}
 
 	async findOne(id: string): Promise<Vehicle> {

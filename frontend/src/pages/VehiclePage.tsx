@@ -1,9 +1,8 @@
-import { DirectionsCar as CarIcon, Settings as SettingsIcon } from '@mui/icons-material';
+import { DirectionsCar as CarIcon } from '@mui/icons-material';
 import {
   Box,
   Button,
   CircularProgress,
-  IconButton,
   Paper,
   Table,
   TableBody,
@@ -15,9 +14,11 @@ import {
   Typography,
 } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import toast from 'react-hot-toast';
 import { userClient } from '../api/userClient';
 import { vehicleClient } from '../api/vehicleClient';
 import VehicleDialog from '../components/VehicleDialog';
+import { VehicleRowItem } from '../components/VehicleRowItem';
 import type { User } from '../types/User';
 import type { Vehicle } from '../types/Vehicle';
 
@@ -47,6 +48,7 @@ export default function VehiclesPage() {
       setUsers(uRes.data);
     } catch (err) {
       console.error('Помилка завантаження', err);
+      toast.error('Помилка завантаження');
     } finally {
       setLoading(false);
     }
@@ -196,37 +198,15 @@ export default function VehiclesPage() {
               </TableHead>
               <TableBody>
                 {sortedVehicles.map((v) => (
-                  <TableRow key={v.id} className="hover:bg-slate-800/30 transition-colors">
-                    <TableCell className="font-mono text-[10px] text-slate-600">
-                      #{v.id.split('-')[0]}
-                    </TableCell>
-                    <TableCell>
-                      <Typography className="text-white font-black text-lg uppercase tracking-tight">
-                        {v.make} <span className="text-orange-500">{v.model}</span>
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <span className="bg-slate-800 text-slate-300 px-3 py-1 rounded-full text-xs font-bold border border-slate-700">
-                        {v.year ? v.year : 'N/A'}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" className="text-slate-300 font-bold">
-                        {getOwnerName(v.userId)}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="right">
-                      <IconButton
-                        onClick={() => {
-                          setSelectedVehicle(v);
-                          setIsDialogOpen(true);
-                        }}
-                        className="text-slate-500 hover:text-orange-500"
-                      >
-                        <SettingsIcon fontSize="small" />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
+                  <VehicleRowItem
+                    key={v.id}
+                    vehicle={v}
+                    ownerName={getOwnerName(v.userId)}
+                    onEdit={(vehicle) => {
+                      setSelectedVehicle(vehicle);
+                      setIsDialogOpen(true);
+                    }}
+                  />
                 ))}
               </TableBody>
             </Table>

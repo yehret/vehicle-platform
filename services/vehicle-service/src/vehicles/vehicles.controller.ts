@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
 import type { Request } from 'express';
 import { AuthGuard } from 'src/common/guards/auth.guard';
@@ -15,17 +15,27 @@ export class VehiclesController {
 		await this.vehiclesService.createEmpty(userId);
 	}
 
+	@EventPattern('user.updated')
+	handleUserUpdated(@Payload() data: any) {
+		console.log('Caught user.updated event!', data);
+	}
+
+	@EventPattern('user.deleted')
+	handleUserDeleted(@Payload() data: any) {
+		console.log('Caught user.deleted event!', data);
+	}
+
 	@Post()
 	@UseGuards(AuthGuard)
 	create(@Req() req: Request, @Body() createVehicleDto: CreateVehicleDto) {
-		const userId = req.session.userId;
-		return this.vehiclesService.create(userId, createVehicleDto);
+		const userId = createVehicleDto.userId || req.session.userId;
+		return this.vehiclesService.create(createVehicleDto, userId);
 	}
 
 	@Get()
 	@UseGuards(AuthGuard)
-	findAll() {
-		return this.vehiclesService.findAll();
+	findAll(@Query('userId') userId?: string) {
+		return this.vehiclesService.findAll(userId);
 	}
 
 	@Get(':id')

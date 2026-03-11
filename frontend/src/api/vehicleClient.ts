@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const vehicleClient = axios.create({
-  baseURL: 'http://localhost:3002',
+  baseURL: import.meta.env.VITE_API_URL_VEHICLE,
   withCredentials: true,
 });
 

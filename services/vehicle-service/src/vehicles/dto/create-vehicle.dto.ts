@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsInt, IsNotEmpty, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator';
 
 export class CreateVehicleDto {
 	@IsString()
@@ -14,4 +14,8 @@ export class CreateVehicleDto {
 	@Max(new Date().getFullYear() + 1)
 	@IsOptional()
 	year?: number;
+
+	@IsUUID()
+	@IsOptional()
+	userId?: string;
 }

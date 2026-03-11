@@ -1,4 +1,5 @@
 import { CssBaseline, ThemeProvider } from '@mui/material';
+import { Toaster } from 'react-hot-toast';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -27,6 +28,8 @@ function App() {
           </Routes>
         </main>
       </BrowserRouter>
+
+      <Toaster />
     </ThemeProvider>
   );
 }

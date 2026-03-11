@@ -12,12 +12,15 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import type { AxiosError } from 'axios';
 import { useEffect, useState } from 'react';
 import { useForm, type Resolver } from 'react-hook-form';
+import toast from 'react-hot-toast';
 import { z } from 'zod';
 import { userClient } from '../api/userClient';
 import { vehicleClient } from '../api/vehicleClient';
 import type { User } from '../types/User';
+import type { Vehicle } from '../types/Vehicle';
 
 const vehicleSchema = z.object({
   make: z.string().min(2, 'Вкажіть марку'),
@@ -31,7 +34,14 @@ const vehicleSchema = z.object({
 
 type VehicleFormData = z.infer<typeof vehicleSchema>;
 
-export default function VehicleDialog({ open, vehicle, onClose, onSuccess }: any) {
+interface VehicleDialogProps {
+  open: boolean;
+  vehicle: Vehicle | null;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+export default function VehicleDialog({ open, vehicle, onClose, onSuccess }: VehicleDialogProps) {
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [apiError, setApiError] = useState('');
@@ -47,7 +57,6 @@ export default function VehicleDialog({ open, vehicle, onClose, onSuccess }: any
 
   useEffect(() => {
     if (open) {
-      // Завантажуємо користувачів для списку
       userClient.get<User[]>('/users').then((res) => setUsers(res.data));
 
       reset(
@@ -55,10 +64,15 @@ export default function VehicleDialog({ open, vehicle, onClose, onSuccess }: any
           ? {
               make: vehicle.make,
               model: vehicle.model,
-              year: vehicle.year,
+              year: vehicle.year ?? new Date().getFullYear(),
               userId: vehicle.userId,
             }
-          : { make: '', model: '', year: new Date().getFullYear(), userId: '' },
+          : {
+              make: '',
+              model: '',
+              year: new Date().getFullYear(),
+              userId: '',
+            },
       );
     }
   }, [open, vehicle, reset]);
@@ -68,30 +82,23 @@ export default function VehicleDialog({ open, vehicle, onClose, onSuccess }: any
       setLoading(true);
       if (vehicle) await vehicleClient.put(`/vehicles/${vehicle.id}`, data);
       else await vehicleClient.post('/vehicles', data);
+      toast.success('Авто збережено');
       onSuccess();
       onClose();
-    } catch (err: any) {
-      setApiError(err.response?.data?.message || 'Помилка збереження');
+    } catch (err) {
+      const axiosError = err as AxiosError<{ message: string }>;
+
+      const errorMessage = axiosError.response?.data?.message || 'Помилка збереження';
+      setApiError(errorMessage);
+
+      console.error('API Error:', errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      fullWidth
-      maxWidth="xs"
-      PaperProps={{
-        sx: {
-          borderRadius: 5,
-          bgcolor: '#0f172a',
-          border: '1px solid #1e293b',
-          backgroundImage: 'none',
-        },
-      }}
-    >
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitle className="font-black text-2xl text-white italic uppercase pt-6">
         {vehicle ? 'Редагувати' : 'Додати'} <span className="text-orange-500">Авто</span>
       </DialogTitle>

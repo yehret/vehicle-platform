@@ -68,7 +68,7 @@ export default function Navbar() {
           <Box className="ml-4 flex items-center gap-4 pl-4 border-l border-slate-800">
             {user ? (
               <Box className="flex items-center gap-3">
-                <Box className="text-right  hidden sm:block">
+                <Box className="text-right sm:block flex! flex-col">
                   <Typography variant="body2" className="text-white font-bold leading-none">
                     {user.firstName || 'Адмін'}
                   </Typography>

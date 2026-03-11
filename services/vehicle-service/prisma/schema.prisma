@@ -1,17 +1,18 @@
 generator client {
-  provider = "prisma-client-js"
+   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+   provider = "postgresql"
+   url      = env("DATABASE_VEHICLE_URL")
 }
 
 model Vehicle {
-  id        String   @id @default(uuid())
-  make      String
-  model     String
-  year      Int?
-  userId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+   id        String   @id @default(uuid())
+   make      String
+   model     String
+   year      Int?
+   userId    String
+   createdAt DateTime @default(now())
+   updatedAt DateTime @updatedAt
 }

@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
+import {
+	Body,
+	Controller,
+	Delete,
+	Get,
+	Param,
+	Patch,
+	Post,
+	Req,
+	UnauthorizedException,
+	UseGuards
+} from '@nestjs/common';
 import type { Request } from 'express';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -32,7 +43,7 @@ export class UsersController {
 		return this.usersService.findOne(id);
 	}
 
-	@Put(':id')
+	@Patch(':id')
 	async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
 		return this.usersService.update(id, updateUserDto);
 	}
