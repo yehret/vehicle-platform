@@ -11,6 +11,7 @@ async function bootstrap() {
 	const RedisStore = connectRedis.RedisStore || connectRedis.default || connectRedis;
 
 	const app = await NestFactory.create(AppModule);
+	app.setGlobalPrefix('api');
 
 	const configService = app.get(ConfigService);
 	const redisClient = app.get(RedisService);
